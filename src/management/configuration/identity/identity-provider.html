@@ -18,7 +18,7 @@
 <div class="gv-forms" layout="column">
   <div layout="row" layout-align="start end" class="gv-forms-header">
     <h1 ng-if="$ctrl.updateMode">
-      <md-icon 
+      <md-icon
         md-svg-icon="assets/logo_{{$ctrl.identityProvider.type | lowercase}}-idp.svg"
         style="fill: black;"
       ></md-icon>
@@ -48,7 +48,7 @@
         <div layout-gt-sm="row">
           <md-input-container class="md-block" flex-gt-sm>
             <label>Name</label>
-            <input ng-model="$ctrl.identityProvider.name" type="text" required name="name" maxlength="50" autofocus>
+            <input ng-model="$ctrl.identityProvider.name" type="text" required name="name" maxlength="50" autofocus ng-readonly="$ctrl.identityProvider.type === 'memory' || $ctrl.identityProvider.type === 'gravitee'">
             <div class="hint" ng-if="formIdentityProvider.name.$valid || formIdentityProvider.name.$pristine">
               Identity provider name. The name will be used to define the authentication endpoint.</div>
             <div ng-messages="formIdentityProvider.name.$error">
@@ -61,7 +61,7 @@
         <div layout-gt-sm="row">
           <md-input-container class="md-block" flex-gt-sm>
             <label>Description</label>
-            <input ng-model="$ctrl.identityProvider.description" type="text" name="description">
+            <input ng-model="$ctrl.identityProvider.description" type="text" name="description" ng-readonly="$ctrl.identityProvider.type === 'memory' || $ctrl.identityProvider.type === 'gravitee'">
             <div class="hint" ng-if="formIdentityProvider.description.$valid || formIdentityProvider.description.$pristine">
               Provide a description of the identity provider
             </div>
@@ -71,14 +71,14 @@
         <div layout-gt-sm="row" ng-if="$ctrl.identityProvider.type === 'oidc' && $ctrl.tokenExchangeEndpoint">
           <md-input-container class="md-block" flex-gt-sm>
             <label>Token exchange endpoint</label>
-            <input ng-model="$ctrl.tokenExchangeEndpoint" type="text" name="exchangeEndpoint" readonly>
+            <input ng-model="$ctrl.tokenExchangeEndpoint" type="text" name="exchangeEndpoint">
             <div class="hint">
               Token exchange endpoint used to convert a provider token to a gravitee token to let the user to consume the Gravitee.io Management API.
             </div>
           </md-input-container>
         </div>
 
-        <div layout-gt-sm="row">
+        <div layout-gt-sm="row" ng-if="$ctrl.isSocialProvider()">
           <md-input-container class="md-block" flex-gt-sm>
             <md-checkbox
                     ng-model="$ctrl.identityProvider.emailRequired"
@@ -92,12 +92,12 @@
 
         <div layout-gt-sm="row">
           <md-radio-group ng-model="$ctrl.identityProvider.syncMappings">
-            <md-radio-button ng-value="false" class="md-primary">
+            <md-radio-button ng-value="false" class="md-primary" ng-disabled="$ctrl.identityProvider.type === 'memory' || $ctrl.identityProvider.type === 'gravitee'">
               Group and role mappings are computed only during first user authentication. Subsequent authentications
               will not update any of these mappings. This mode is useful if you want to let the platform administrator
               manage by himself roles and permissions.
             </md-radio-button>
-            <md-radio-button ng-value="true">
+            <md-radio-button ng-value="true" ng-disabled="$ctrl.identityProvider.type === 'memory' || $ctrl.identityProvider.type === 'gravitee'">
               Group and role mappings are computed during each user authentication. Platform administrators still have the
               ability to override mappings but those one will be refreshed after next user authentications.</md-radio-button>
           </md-radio-group>
@@ -110,9 +110,12 @@
       <gv-identityprovider-github ng-switch-when="github" identity-provider="$ctrl.identityProvider"></gv-identityprovider-github>
       <gv-identityprovider-oidc ng-switch-when="oidc" identity-provider="$ctrl.identityProvider"></gv-identityprovider-oidc>
       <gv-identityprovider-graviteeio-am ng-switch-when="graviteeio_am" identity-provider="$ctrl.identityProvider"></gv-identityprovider-graviteeio-am>
+      <gv-identityprovider-gravitee ng-switch-when="gravitee" identity-provider="$ctrl.identityProvider"></gv-identityprovider-gravitee>
+      <gv-identityprovider-ldap ng-switch-when="ldap" identity-provider="$ctrl.identityProvider" form-identity-provider="formIdentityProvider"></gv-identityprovider-ldap>
+      <gv-identityprovider-memory ng-switch-when="memory" identity-provider="$ctrl.identityProvider"></gv-identityprovider-memory>
     </div>
 
-    <div class="gv-form" ng-if="$ctrl.updateMode">
+    <div class="gv-form" ng-if="$ctrl.updateMode && $ctrl.isSocialProvider()">
       <h2>Groups Mapping</h2>
       <div class="gv-form-content" layout="column">
 
@@ -145,7 +148,7 @@
       </div>
     </div>
 
-    <div class="gv-form" ng-if="$ctrl.updateMode">
+    <div class="gv-form" ng-if="$ctrl.updateMode && $ctrl.isSocialProvider()">
       <h2>Roles Mapping</h2>
       <div class="gv-form-content" layout="column">
 

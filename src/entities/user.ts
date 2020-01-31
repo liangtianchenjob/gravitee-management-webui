@@ -24,6 +24,7 @@ export class User {
   public userPermissions: string[];
   public userApiPermissions: string[];
   public userApplicationPermissions: string[];
+  public source: string;
   public tasks: PagedResult;
   public notifications: PagedResult;
   public authenticated: boolean = false;
